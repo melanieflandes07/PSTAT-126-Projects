@@ -1,0 +1,115 @@
+---
+title: "PSTAT 126 Project 4"
+author: "Melanie Flandes"
+date: "2/23/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1 
+```{r}
+library(datasets)
+data(cars)
+```
+
+## Part a | Plotting Fitness 
+```{r}
+y = cars$dist
+x = cars$speed
+fit = lm(y~x)
+plot(x,y,xlab = "Car Speed", ylab = "Car Distance")
+abline(fit$coefficients[1],fit$coefficients[2])
+```
+
+## Part b | Residual vs Fit Plot
+```{r}
+yhat = fitted(fit)
+e = y - yhat
+plot(yhat, e, xlab = "Fitted Values", ylab = "Residual", main = "Residual vs Fit")
+abline(h = 0, lty = 2)
+```
+
+  The "residual vs fit" plot does not have a non-constant variance and there is no non-linearity problem because it does seem to have some funneling but it is not to severe therefore we can still consider the plot to be linear. The main problem is that this plot gives us no more new information. \newline 
+
+## Part c | Q-Q Plot
+```{r}
+qqnorm(e, ylim = c(-123.7, 105.1))
+qqline(e)
+```
+  The Q-Q plot meets the normality assumption because the Residual vs Fit plot is linear and looking at the Q-Q it get more linear. Which means the normal Q-Q plot of the residuals is approximately linear supporting that the error terms are normally distributed. \newline
+
+## Part d | Shapiro Test 
+$H_0:$ Variable is normally distributed \newline
+$H_1:$ Variable is not normally distributed \newline
+$\alpha = .05$ \newline
+```{r}
+shapiro.test(e) 
+```
+  Since our p-value is 0.02152 it is smaller than our alpha value of .05, which means we fail to reject the null hypothesis. Therefore there is enough significant evidence to conclude that the variable is normally distributed. This Shapiro Test does support our conclusion from part c. \newline
+
+```{r}
+library(MASS)
+boxcox(y ~ x, lambda = seq(-1,1,length = 10))
+```
+
+## Part e | Fitness plot
+```{r}
+y = sqrt(cars$dist)
+fit1 = lm(y~x)
+plot(x,y,xlab = "Car Speed", ylab = "Sqrt of Car Distance")
+abline(fit1$coefficients[1],fit1$coefficients[2])
+```
+
+## Problem 2
+```{r}
+library(datasets)
+data("stackloss")
+```
+
+## Part a | Coefficient of Determination
+```{r}
+y = stackloss$stack.loss
+x = stackloss$Water.Temp
+fit2 = lm(y~x)
+plot(x,y,xlab = "Water.Temp", ylab = "Stack.loss")
+abline(fit2$coefficients[1],fit2$coefficients[2])
+y.lm = lm(y~x, data = stackloss)
+summary(y.lm)$r.squared
+```
+  The coefficient of determination (or R squared) is 0.766508 \newline
+
+## Part b | Residual vs Fit Plot
+```{r}
+yhat = fitted(fit2)
+e = y - yhat
+plot(yhat, e, xlab = "Fitted Values", ylab = "Residual", main = "Residual vs Fit")
+abline(h = 0, lty = 2)
+```
+  The "residual vs fit" plot has a non-constant variance and has a non-linearity problem.The main problem is that the plot shows some fanning pattern therefore there is some evidence that the error terms might not be equal. \newline
+
+## Part c | Coefficient of Determination
+```{r}
+WaterTemp2 = (stackloss$Water.Temp)^2
+quadradic.model = lm(y ~ x + WaterTemp2)
+summary(quadradic.model)
+```
+  The coefficient of determination (R squared) is 0.8755 \newline
+
+## Part d | Plot 
+```{r}
+plot(x,y,xlab = "Water.Temp",ylab = "Stack.loss")
+lines(sort(x),(fitted(quadradic.model))[order(x)])
+```
+
+## Part e | Analysis of Variance Table 
+```{r}
+x1 = stackloss$Water.Temp
+x2 = (stackloss$Water.Temp)^2
+fit3 = lm(x2~x1)
+anov = anova(fit3)
+anov
+```
+  The $SSR(x_2|x_1) = 382385$ \newline

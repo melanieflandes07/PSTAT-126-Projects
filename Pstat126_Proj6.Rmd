@@ -1,0 +1,117 @@
+---
+title: "PSTAT 126 Project 6"
+author: "Melanie Flandes"
+date: "3/15/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warnign = FALSE)
+```
+
+```{r}
+library(faraway)
+data(state)
+state.x77 = as.data.frame(state.x77)
+colnames(state.x77)[4] = "Life.Exp"
+```
+
+## Problem 1a | Fitting Linear Models
+
+```{r}
+mod0 = lm(Life.Exp ~ 1, data = state.x77)
+mod.all = lm(Life.Exp ~ ., data = state.x77 )
+step(mod0, scope = list(lower = mod0, upper = mod.all))
+mod.AIC = lm(Life.Exp ~ Murder + `HS Grad` + Frost, data = state.x77)
+summary(mod.AIC)
+```
+
+## Problem 1b | Plotting using Model Selection
+
+```{r}
+library(leaps)
+Population = state.x77$Population
+Income = state.x77$Income
+Illiteracy = state.x77$Illiteracy
+Murder = state.x77$Murder
+`HS Grad` = state.x77$`HS Grad`
+Frost = state.x77$Frost
+Area = state.x77$Area
+Life.Exp = state.x77$Life.Exp
+
+mod = regsubsets(cbind(Population,Income, Illiteracy, Murder, `HS Grad`, Frost, Area), Life.Exp)
+summary.mod = summary(mod)
+names(summary(mod))
+
+summary.mod$which
+
+plot(summary.mod$cp)
+abline(1,1)
+mod.cp = lm(Life.Exp ~ Murder + `HS Grad` + Frost, data = state.x77)
+
+```
+
+## Problem 1c | Summary 
+
+```{r, fig.align='center'}
+summary.mod$adjr2
+```
+
+## Problem 1d | Plot
+
+```{r, fig.align='center'}
+dimen = dim(state.x77)[1]
+num.col = 8
+hat_val = hatvalues(mod.all)
+which(hat_val == max(hat_val))
+
+states = rownames(state.x77)
+plot(hat_val, ylab = 'Hat Values', main = 'Hat Values')
+text(1:dimen, hat_val, labels = states, cex = .7, pos = 4)
+avg.hat = num.col/dimen
+
+abline(h=2*avg.hat, col = 4)
+
+abline(h=3*avg.hat, col = 2)
+text(2, y=2*avg.hat, expression(2 %*% num.col/dimen), pos=3)
+text(2, y=3*avg.hat, expression(3 %*% num.col/dimen), pos=3)
+
+rstand = rstandard(mod.all)
+which(rstand == max(rstand))
+
+c = 2*sqrt((num.col+1)/(dimen-num.col-1))
+c
+which(dffits(mod.all) > c)
+```
+  Alaska is the state with the highest leverage, Hawaii is the state with the largest externally studentized leverage, The degrees of freedom for the fit is Hawaii. \newline
+
+## Problem 1e | Plotting Fitted Model
+```{r, fig.align='center'}
+fit2 = lm(Life.Exp ~ ., data = state.x77[-11,])
+summary(mod.all)
+summary(fit2)
+```
+  The new model has a stronger relationship because the r squared is increased. \newline
+
+## Problem 2a | Log Likelihood for BoxCox
+```{r}
+library(alr4)
+data(lathe1)
+attach(lathe1)
+life = Life[-c(7,8,10)]
+life1 = log(life)
+speed1 = Speed[-c(7,8,10)]
+
+boxCox(life1 ~ speed1, data = lathe1, seq(-20,60,10))
+```
+
+## Problem 2b | Removing Influential Points
+```{r, fig.align='center'}
+L = lathe1[-c(3,4),]
+mod.all1 = lm(Life ~ Speed + Feed, data = lathe1)
+fit2 = lm(Life ~ Speed + Feed, data = L)
+summary(mod.all1)
+summary(fit2)
+```
+  Once the influential points are removed it made the relationship stronger. \newline
+

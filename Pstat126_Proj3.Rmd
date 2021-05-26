@@ -1,0 +1,112 @@
+---
+title: "PSTAT 126 Project 3"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(alr4)
+```
+
+## 1a) Drawing scatter plot and line of reggression 
+
+```{r}
+attach(UN11)
+x = log(UN11$ppgdp)
+y = log(UN11$fertility)
+fit = lm(log(fertility) ~ log(ppgdp))
+plot(log(fertility) ~ log(ppgdp))
+abline(fit$coef[1],fit$coef[2],color = 'red')
+```
+
+##1b) Coefficient
+
+```{r}
+summary(fit)
+```
+
+##1c) Predicting the Log(x = 43140.9)
+
+```{r}
+fit = lm(y ~ x)
+data1 = data.frame(x = log(43140.9))
+predict(fit,newdata = data1 ,interval = "predict", level = .95)
+```
+
+##1d) Finding the Confidence Interval 
+
+```{r}
+lower_bound = exp(-0.1554686)
+lower_bound
+upper_bound = exp(1.064984)
+upper_bound
+```
+
+##2a) Calculating the Anova 
+
+```{r}
+library(faraway)
+attach(prostate)
+x = prostate$lcavol
+y = prostate$lpsa
+fit1 = lm(y ~ x)
+anov = anova(fit1)
+anov
+```
+
+##2b) Explanation of the Anova 
+
+In the ANOVA test the $S_{xx}$ is the quantity that is being represented. The $S_{xx}$ in this specific problem is the value that determines the variability of lpsa. Therefore, the value of the sse is not being represented. 
+
+
+## 2c) F-testing
+
+$H_0: B_1 = 0 $ \newline
+$H_1: B_1 \neq 0$ \newline 
+```{r}
+f_test = var.test(x,y)
+f_test
+```
+Our p-value is .8387 which is greater than our $\alpha = .05$. Therefore we have enough significant evidence to conclude that B1=0. Therefore we fail to reject the null hypothesis.
+
+
+
+## 2d) T-testing
+```{r}
+t.test(x,y)
+```
+
+## 3a) using the lm() function
+```{r}
+library(faraway)
+attach(fat)
+x = fat$brozek
+y = fat$age
+fit2 = lm( y ~ x)
+fit2 
+summary(fit2)
+```
+
+## 3b Stating the variation
+```{r}
+summary(fit2)
+```
+The multiple R is equal to .08362 which is the variance of our model. \newline 
+
+
+## 3c) ploting the residuals
+```{r}
+plot(fat$siri, residuals(fit2))
+```
+Siri is contributing to our model because its explaining more variation than our original model. \newline 
+
+
+## 3d) using the lm() function with 3 datasets
+```{r}
+lm(fat$brozek~fat$age+fat$siri)
+```
+
+
